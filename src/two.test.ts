@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import {
+    getTotalCubeCount,
     idFromGameName,
     parseGame,
     parseGameSets,
@@ -114,6 +115,19 @@ describe('Day 2', () => {
             const result = parseGame(input)
             expect(result).toHaveProperty('id', 1)
             expect(result.sets).toBeArrayOfSize(3)
+        })
+    })
+
+    describe('getTotalCubeCount', () => {
+        it('should return the total cvube counts', () => {
+            const input =
+                'Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red'
+            const game = parseGame(input)
+            const totals = getTotalCubeCount(game)
+
+            expect(totals).toHaveProperty('red', 23)
+            expect(totals).toHaveProperty('blue', 21)
+            expect(totals).toHaveProperty('green', 7)
         })
     })
 })

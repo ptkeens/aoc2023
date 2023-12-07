@@ -13,6 +13,23 @@ export type Game = {
     sets: CubeSet[]
 }
 
+const defaultSet = (): CubeSet => ({
+    red: 0,
+    blue: 0,
+    green: 0,
+})
+
+export const getTotalCubeCount = (game: Game): CubeSet => {
+    const result = defaultSet()
+    for (const set of game.sets) {
+        result.red += set.red
+        result.blue += set.blue
+        result.green += set.green
+    }
+
+    return result
+}
+
 export const parseGame = (line: string): Game => {
     const [gameTitle, sets] = line.split(':')
 
@@ -36,11 +53,7 @@ export const stringToCube = (str: string): Cube => {
 }
 
 export const parseSet = (set: string): CubeSet => {
-    const result = {
-        red: 0,
-        blue: 0,
-        green: 0,
-    }
+    const result = defaultSet()
 
     if (set.length === 0) {
         return result
