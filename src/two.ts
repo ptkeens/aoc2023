@@ -22,12 +22,21 @@ const defaultSet = (): CubeSet => ({
 })
 
 export const isGamePosibleWithBag = (bag: CubeSet, game: Game): boolean => {
-    const totals = getTotalCubeCount(game)
-    const checks = [
-        totals.red <= bag.red,
-        totals.blue <= bag.blue,
-        totals.green <= bag.green,
-    ]
+    const checks = game.sets.map((set) => {
+        if (set.red > bag.red) {
+            return false
+        }
+
+        if (set.blue > bag.blue) {
+            return false
+        }
+
+        if (set.green > bag.green) {
+            return false
+        }
+
+        return true
+    })
 
     return checks.every((r) => r === true)
 }
@@ -113,7 +122,7 @@ export default () => {
 
     const result = input
         .split('\n')
-        .filter((line) => line.length > 0)
+        .filter((line) => line.trim().length > 0)
         .map((line) => parseGame(line.trim()))
         .filter((game) => isGamePosibleWithBag(bag, game))
         .reduce((total, game) => (total += game.id), 0)

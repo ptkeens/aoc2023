@@ -120,7 +120,7 @@ describe('Day 2', () => {
     })
 
     describe('getTotalCubeCount', () => {
-        it('should return the total cvube counts', () => {
+        it('should return the total cube counts', () => {
             const input =
                 'Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red'
             const game = parseGame(input)
@@ -163,7 +163,8 @@ describe('Day 2', () => {
     })
 
     describe('test input', () => {
-        const input = `
+        it('should find the answer to the sample puzzle', () => {
+            const input = `
             Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
             Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
             Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
@@ -171,19 +172,20 @@ describe('Day 2', () => {
             Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
         `
 
-        const bag = {
-            red: 12,
-            blue: 14,
-            green: 13,
-        }
+            const bag = {
+                red: 12,
+                blue: 14,
+                green: 13,
+            }
 
-        const result = input
-            .split('\n')
-            .filter((line) => line.length > 0)
-            .map((line) => parseGame(line.trim()))
-            .filter((game) => isGamePosibleWithBag(bag, game))
-            .reduce((total, game) => (total += game.id), 0)
+            const result = input
+                .split('\n')
+                .filter((line) => line.trim().length > 0)
+                .map((line) => parseGame(line.trim()))
+                .filter((game) => isGamePosibleWithBag(bag, game))
+                .reduce((total, game) => (total += game.id), 0)
 
-        expect(result).toBe(8)
+            expect(result).toBe(8)
+        })
     })
 })
