@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import {
     getTotalCubeCount,
     idFromGameName,
+    isGamePosibleWithBag,
     parseGame,
     parseGameSets,
     parseSet,
@@ -128,6 +129,36 @@ describe('Day 2', () => {
             expect(totals).toHaveProperty('red', 23)
             expect(totals).toHaveProperty('blue', 21)
             expect(totals).toHaveProperty('green', 7)
+        })
+    })
+
+    describe('isGamePossibleWithBag', () => {
+        it('should return true if game is possible', () => {
+            const input =
+                'Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green'
+            const game = parseGame(input)
+            const bag = {
+                red: 10,
+                green: 10,
+                blue: 10,
+            }
+
+            const result = isGamePosibleWithBag(bag, game)
+            expect(result).toBeTrue()
+        })
+
+        it('should return false if game is not possible', () => {
+            const input =
+                'Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green'
+            const game = parseGame(input)
+            const bag = {
+                red: 1,
+                green: 10,
+                blue: 10,
+            }
+
+            const result = isGamePosibleWithBag(bag, game)
+            expect(result).toBeFalse()
         })
     })
 })

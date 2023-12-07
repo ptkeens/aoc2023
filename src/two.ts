@@ -19,6 +19,17 @@ const defaultSet = (): CubeSet => ({
     green: 0,
 })
 
+export const isGamePosibleWithBag = (bag: CubeSet, game: Game): boolean => {
+    const totals = getTotalCubeCount(game)
+    const checks = [
+        totals.red <= bag.red,
+        totals.green <= bag.green,
+        totals.blue <= bag.blue,
+    ]
+
+    return checks.every((r) => r === true)
+}
+
 export const getTotalCubeCount = (game: Game): CubeSet => {
     const result = defaultSet()
     for (const set of game.sets) {
