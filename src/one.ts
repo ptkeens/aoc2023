@@ -51,7 +51,9 @@ const extractValueFromLine = (line: string): number => {
     } else if (onlyDigits.length === 1) {
         return Number.parseInt(onlyDigits[0] + onlyDigits[0])
     } else {
-        throw new Error(`Did not find a number in the line  {onlyDigits}`)
+        throw new Error(
+            `Did not find a number in the line ${onlyDigits.join('')}`
+        )
     }
 }
 
@@ -64,6 +66,7 @@ const extractNumbersFromText = (line: string): string => {
             for (const replacement of replacements) {
                 if (line.substring(i).indexOf(replacement.text) === 0) {
                     onlyNumbers.push(replacement.value)
+                    break
                 }
             }
         }
