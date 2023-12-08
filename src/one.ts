@@ -86,7 +86,7 @@ export default () => {
         .map((line) => extractValueFromLine(line))
         .reduce((total, value) => (total += value))
 
-    console.log(`Part 1: ${part1}`)
+    console.log(`1.1: ${part1}`)
 
     // 1.2
     const part2 = input
@@ -94,6 +94,6 @@ export default () => {
         .map((line) => extractValueFromLine(line))
         .reduce((total, value) => (total += value))
 
-    console.log(`Part 2: ${part2}`)
+    console.log(`1.2: ${part2}`)
     console.log()
 }
