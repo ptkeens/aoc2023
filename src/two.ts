@@ -21,35 +21,21 @@ const defaultSet = (): CubeSet => ({
     green: 0,
 })
 
+const getArrayOfCubeColors = (): Cube[] => ['red', 'green', 'blue']
+
 export const isGamePosibleWithBag = (bag: CubeSet, game: Game): boolean => {
+    const cubes = getArrayOfCubeColors()
     const checks = game.sets.map((set) => {
-        if (set.red > bag.red) {
-            return false
-        }
-
-        if (set.blue > bag.blue) {
-            return false
-        }
-
-        if (set.green > bag.green) {
-            return false
+        for (const cube of cubes) {
+            if (set[cube] > bag[cube]) {
+                return false
+            }
         }
 
         return true
     })
 
     return checks.every((r) => r === true)
-}
-
-export const getTotalCubeCount = (game: Game): CubeSet => {
-    const result = defaultSet()
-    for (const set of game.sets) {
-        result.red += set.red
-        result.blue += set.blue
-        result.green += set.green
-    }
-
-    return result
 }
 
 export const parseGame = (line: string): Game => {
@@ -59,6 +45,24 @@ export const parseGame = (line: string): Game => {
         id: Number.parseInt(idFromGameName(gameTitle)),
         sets: parseGameSets(sets),
     }
+}
+
+export const getMinimumCubesNeededForGame = (game: Game): CubeSet => {
+    const result = defaultSet()
+    const cubes = getArrayOfCubeColors()
+    return game.sets.reduce((minSet, set) => {
+        for (const cube of cubes) {
+            if (set[cube] > minSet[cube]) {
+                minSet[cube] = set[cube]
+            }
+        }
+
+        return minSet
+    }, result)
+}
+
+export const getCubePowerSet = (set: CubeSet): number => {
+    return set.red * set.blue * set.green
 }
 
 export const stringToCube = (str: string): Cube => {
@@ -120,12 +124,21 @@ export default () => {
         green: 13,
     }
 
-    const result = input
+    const result1 = input
         .split('\n')
         .filter((line) => line.trim().length > 0)
         .map((line) => parseGame(line.trim()))
         .filter((game) => isGamePosibleWithBag(bag, game))
         .reduce((total, game) => (total += game.id), 0)
 
-    console.log(`1.1: ${result}`)
+    console.log(`2.1: ${result1}`)
+
+    const result2 = input
+        .split('\n')
+        .filter((line) => line.trim().length > 0)
+        .map((line) => parseGame(line.trim()))
+        .map((game) => getMinimumCubesNeededForGame(game))
+        .reduce((total, game) => (total += getCubePowerSet(game)), 0)
+
+    console.log(`2.2 ${result2}`)
 }
