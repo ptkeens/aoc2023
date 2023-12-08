@@ -112,12 +112,6 @@ export const idFromGameName = (name: string): string => {
 const input = readFileSync('./src/inputs/day2.txt', 'utf-8')
 
 export default () => {
-    // 1.1
-    /**
-     * Determine which games would have been possible if the bag had been loaded with only
-     * 12 red cubes, 13 green cubes, and 14 blue cubes.
-     * What is the sum of the IDs of those games?
-     */
     const bag = {
         red: 12,
         blue: 14,
