@@ -6,7 +6,7 @@
  * Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
  */
 
-import { readFileSync } from 'fs'
+import { extractInput } from './util'
 
 export type Cube = 'red' | 'blue' | 'green'
 export type CubeSet = Record<Cube, number>
@@ -109,9 +109,10 @@ export const idFromGameName = (name: string): string => {
     return match[1]
 }
 
-const input = readFileSync('./src/inputs/day2.txt', 'utf-8')
+const input = extractInput('day2')
 
 export default () => {
+    console.log(`Day 2:`)
     const bag = {
         red: 12,
         blue: 14,
@@ -119,8 +120,6 @@ export default () => {
     }
 
     const result1 = input
-        .split('\n')
-        .filter((line) => line.trim().length > 0)
         .map((line) => parseGame(line.trim()))
         .filter((game) => isGamePosibleWithBag(bag, game))
         .reduce((total, game) => (total += game.id), 0)
@@ -128,11 +127,10 @@ export default () => {
     console.log(`2.1: ${result1}`)
 
     const result2 = input
-        .split('\n')
-        .filter((line) => line.trim().length > 0)
         .map((line) => parseGame(line.trim()))
         .map((game) => getMinimumCubesNeededForGame(game))
         .reduce((total, game) => (total += getCubePowerSet(game)), 0)
 
     console.log(`2.2 ${result2}`)
+    console.log()
 }
