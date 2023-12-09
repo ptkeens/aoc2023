@@ -13,23 +13,30 @@ type Symbol = {
     col: number
 }
 
-type Schematic = {
+type SchematicDiscoveryResults = {
     rowCount: number
     colCount: number
     parts: Part[]
     symbols: Symbol[]
 }
 
+type Schematic = string[][]
+
 const input = extractInput('day3').map((line) => line.split(''))
 
 export const isValidSymbol = (input: string): boolean =>
-    /[!@#$%^&*()\+=\-_]/.test(input)
+    /[!@#$%^&*()\+=\-_\/\\]/.test(input)
 
-export const isNumeric = (character: string): boolean => /[\d+]/.test(character)
+export const isNumeric = (character: string): boolean => {
+    const parsed = Number(character)
+    return !Number.isNaN(parsed)
+}
 
-export const findPartsNearSymbols = (output: Schematic) => {}
+export const findPartsNearSymbols = (output: SchematicDiscoveryResults) => {}
 
-export const extractFeatures = (input: string[][]): Schematic => {
+export const extractFeatures = (
+    input: string[][]
+): SchematicDiscoveryResults => {
     // get dimensions of input
     const numRows = input.length
     const numCols = input[0].length
@@ -53,6 +60,8 @@ export const extractFeatures = (input: string[][]): Schematic => {
                         colStart: col - numLen,
                         colEnd: col - 1,
                     })
+                    inNumber = false
+                    currentNumber = ''
                 }
                 continue
             }
@@ -96,12 +105,58 @@ export const extractFeatures = (input: string[][]): Schematic => {
     }
 }
 
-export const describeSchematic = (input: Schematic): void =>
+export const isAdjacentToSymbol = (input: {
+    part: Part
+    processedResults: SchematicDiscoveryResults
+}) => {
+    const { part, processedResults } = input
+
+    // get our dimensions
+    const minCol = 0
+    const maxCol = processedResults.colCount
+    const minRow = 0
+    const maxRow = processedResults.rowCount
+
+    // determine our boundaries
+    const rowAbove = part.row - 1 >= minRow ? part.row - 1 : minRow
+    const rowBelow = part.row + 1 <= maxRow ? part.row + 1 : maxRow
+    const colLeft = part.colStart - 1 >= minCol ? part.colStart - 1 : minCol
+    const colRight = part.colEnd + 1 <= maxCol ? part.colEnd + 1 : maxCol
+
+    const symbolCheck = processedResults.symbols.filter((symbol) => {
+        const rowCheck = symbol.row >= rowAbove && symbol.row <= rowBelow
+        const colCheck = symbol.col >= colLeft && symbol.col <= colRight
+
+        return rowCheck && colCheck
+    })
+
+    return symbolCheck.some((r) => r)
+}
+
+export const extractPartNumbers = (
+    processed: SchematicDiscoveryResults
+): Part[] => {
+    const result: Part[] = []
+    const { parts, symbols } = processed
+
+    return parts.filter((part) =>
+        isAdjacentToSymbol({
+            part,
+            processedResults: processed,
+        })
+    )
+}
+
+export const describeSchematic = (input: SchematicDiscoveryResults): void =>
     console.log(
         `Engine schematic is ${input.rowCount}x${input.colCount} with ${input.parts.length} parts and ${input.symbols.length} symbols`
     )
 
 export default () => {
-    const extracted = extractFeatures(input)
-    describeSchematic(extracted)
+    const features = extractFeatures(input)
+    describeSchematic(features)
+    const extracted = extractPartNumbers(features)
+    const total = extracted.reduce((total, part) => (total += part.value), 0)
+    console.log(`discovered ${extracted.length} parts!`)
+    console.log(`3.1: ${total}`)
 }

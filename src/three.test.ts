@@ -2,6 +2,8 @@ import { describe, it, expect } from 'bun:test'
 import {
     describeSchematic,
     extractFeatures,
+    extractPartNumbers,
+    isAdjacentToSymbol,
     isNumeric,
     isValidSymbol,
 } from './three'
@@ -15,7 +17,7 @@ describe('Day 3', () => {
 
     describe('isValidSymbol', () => {
         it('should detect valid sybmols', () => {
-            const symbols = `!@#$%^&*()\+=\-_`
+            const symbols = `!@#$%^&*()\+=\-_\/\\`
             const results = symbols.split('').map((sym) => isValidSymbol(sym))
             expect(results.every((r) => r)).toBeTrue()
         })
@@ -36,6 +38,12 @@ describe('Day 3', () => {
 
         it('should not detect a character as numeric', () => {
             const chars = 'abcdefghijklmnopqrstuvwxyz'
+            const results = chars.split('').map((chr) => isNumeric(chr))
+            expect(results.every((r) => !r)).toBeTrue()
+        })
+
+        it('should not detect special characters as numeric', () => {
+            const chars = '!@#$%^&*()-_=+<>,./?'
             const results = chars.split('').map((chr) => isNumeric(chr))
             expect(results.every((r) => !r)).toBeTrue()
         })
@@ -115,10 +123,149 @@ describe('Day 3', () => {
                 extracted.symbols.filter((s) => s.value === '*')
             ).toBeArrayOfSize(1)
         })
+
+        it('should extract multiple features on a single line', () => {
+            const input = `
+                ...*..%..1
+                45..123...
+                ..11.+..23
+            `
+            const features = extractFeatures(stringTo2dMatrix(input))
+            expect(features.parts).toBeArrayOfSize(5)
+            expect(features.symbols).toBeArrayOfSize(3)
+        })
+    })
+
+    describe('isAdjacentToSymbol', () => {
+        it('should detect a symbol directly above or below', () => {
+            const inputs = [
+                `
+                ....*..
+                ...123.
+                .......
+                `,
+                `
+                .......
+                ..*123.
+                .......
+                `,
+                `
+                .......
+                ...123*
+                .......
+                `,
+                `
+                .......
+                ...123.
+                ....*..
+                `,
+            ]
+
+            for (const input of inputs) {
+                const formatted = stringTo2dMatrix(input)
+                const features = extractFeatures(formatted)
+                const result = isAdjacentToSymbol({
+                    part: features.parts[0],
+                    processedResults: features,
+                })
+                expect(result).toBeTrue()
+            }
+        })
+
+        it('should detect symbols at a diagonal', () => {
+            const inputs = [
+                `
+                .*.....
+                ..123..
+                .......
+                `,
+                `
+                .....*.
+                ..123..
+                .......
+                `,
+                `
+                .......
+                ..123..
+                .*.....
+                `,
+                `
+                .......
+                ..123..
+                .....*.
+                `,
+            ]
+
+            for (const input of inputs) {
+                const formatted = stringTo2dMatrix(input)
+                const features = extractFeatures(formatted)
+                const result = isAdjacentToSymbol({
+                    part: features.parts[0],
+                    processedResults: features,
+                })
+                expect(result).toBeTrue()
+            }
+        })
+
+        it('should handle cases at boundaries', () => {
+            const inputs = [
+                `
+                *......
+                123....
+                .......
+                `,
+                `
+                ......*
+                ....123
+                .......
+                `,
+                `
+                .......
+                123....
+                *......
+                `,
+                `
+                .......
+                ....123
+                ......*
+                `,
+            ]
+
+            for (const input of inputs) {
+                const formatted = stringTo2dMatrix(input)
+                const features = extractFeatures(formatted)
+                const result = isAdjacentToSymbol({
+                    part: features.parts[0],
+                    processedResults: features,
+                })
+                expect(result).toBeTrue()
+            }
+        })
+    })
+
+    describe('extractPartNumbers', () => {
+        it('should extract valid part numbers from a schematic', () => {
+            const input = stringTo2dMatrix(`
+            467..114..
+            ...*......
+            ..35..633.
+            ......#...
+            617*......
+            .....+.58.
+            ..592.....
+            ......755.
+            ...$.*....
+            .664.598..`)
+            const parts = extractPartNumbers(extractFeatures(input))
+
+            expect(parts).toBeArray()
+            expect(parts).toBeArrayOfSize(8)
+        })
     })
 
     describe('test input 1', () => {
-        const input = stringTo2dMatrix(`
+        it('should find the answer to the sample puzzle', () => {
+            const input = stringTo2dMatrix(`
         467..114..
         ...*......
         ..35..633.
@@ -130,6 +277,13 @@ describe('Day 3', () => {
         ...$.*....
         .664.598..`)
 
-        const features = extractFeatures(input)
+            const features = extractFeatures(input)
+            const parts = extractPartNumbers(features)
+            const value = parts.reduce(
+                (total, part) => (total += part.value),
+                0
+            )
+            expect(value).toBe(4361)
+        })
     })
 })
