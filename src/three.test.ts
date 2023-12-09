@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'bun:test'
 import {
-    describeSchematic,
     extractFeatures,
     extractPartNumbers,
+    partsAdjacentToSymbol,
     isAdjacentToSymbol,
     isNumeric,
     isValidSymbol,
@@ -263,19 +263,51 @@ describe('Day 3', () => {
         })
     })
 
+    describe('partsAdjacentToSymbol', () => {
+        it('should find gears', () => {
+            const input = stringTo2dMatrix(`
+            467..114..
+            ...*......
+            ..35..633.
+            ......#...
+            617*......
+            .....+.58.
+            ..592.....
+            ......755.
+            ...$.*....
+            .664.598..
+            `)
+
+            const features = extractFeatures(input)
+            const extracted = extractPartNumbers(features)
+            const symbols = features.symbols.filter((sym) => sym.value === '*')
+            const results = symbols
+                .map((sym) =>
+                    partsAdjacentToSymbol({
+                        symbol: sym,
+                        processedResults: features,
+                        validParts: extracted,
+                    })
+                )
+                .filter((part) => part.length === 2)
+
+            expect(results).toBeArrayOfSize(2)
+        })
+    })
+
     describe('test input 1', () => {
         it('should find the answer to the sample puzzle', () => {
             const input = stringTo2dMatrix(`
-        467..114..
-        ...*......
-        ..35..633.
-        ......#...
-        617*......
-        .....+.58.
-        ..592.....
-        ......755.
-        ...$.*....
-        .664.598..`)
+                467..114..
+                ...*......
+                ..35..633.
+                ......#...
+                617*......
+                .....+.58.
+                ..592.....
+                ......755.
+                ...$.*....
+                .664.598..`)
 
             const features = extractFeatures(input)
             const parts = extractPartNumbers(features)
@@ -284,6 +316,42 @@ describe('Day 3', () => {
                 0
             )
             expect(value).toBe(4361)
+        })
+    })
+
+    describe('test input 2', () => {
+        it('should find the answer to the sample puzzle', () => {
+            const input = stringTo2dMatrix(`
+            467..114..
+            ...*......
+            ..35..633.
+            ......#...
+            617*......
+            .....+.58.
+            ..592.....
+            ......755.
+            ...$.*....
+            .664.598..`)
+
+            const features = extractFeatures(input)
+            const extracted = extractPartNumbers(features)
+            const value = features.symbols
+                .filter((sym) => sym.value === '*')
+                .map((sym) =>
+                    partsAdjacentToSymbol({
+                        symbol: sym,
+                        processedResults: features,
+                        validParts: extracted,
+                    })
+                )
+                .filter((parts) => parts.length === 2)
+                .reduce(
+                    (total, adjacentParts) =>
+                        (total +=
+                            adjacentParts[0].value * adjacentParts[1].value),
+                    0
+                )
+            expect(value).toBe(467835)
         })
     })
 })

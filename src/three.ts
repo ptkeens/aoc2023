@@ -20,8 +20,6 @@ type SchematicDiscoveryResults = {
     symbols: Symbol[]
 }
 
-type Schematic = string[][]
-
 const input = extractInput('day3').map((line) => line.split(''))
 
 export const isValidSymbol = (input: string): boolean =>
@@ -105,6 +103,17 @@ export const extractFeatures = (
     }
 }
 
+// helper functions for determining surrounding pixels
+const getRowAbove = (row: number, boundary: number) =>
+    row - 1 >= boundary ? row - 1 : boundary
+const getRowBelow = (row: number, boundary: number) =>
+    row + 1 <= boundary ? row + 1 : boundary
+const getColumnLeft = (col: number, boundary: number) =>
+    col - 1 >= boundary ? col - 1 : boundary
+const getColumnRight = (col: number, boundary: number) =>
+    col + 1 <= boundary ? col + 1 : boundary
+
+// determine if a part is adjacent to any symbols
 export const isAdjacentToSymbol = (input: {
     part: Part
     processedResults: SchematicDiscoveryResults
@@ -118,10 +127,10 @@ export const isAdjacentToSymbol = (input: {
     const maxRow = processedResults.rowCount
 
     // determine our boundaries
-    const rowAbove = part.row - 1 >= minRow ? part.row - 1 : minRow
-    const rowBelow = part.row + 1 <= maxRow ? part.row + 1 : maxRow
-    const colLeft = part.colStart - 1 >= minCol ? part.colStart - 1 : minCol
-    const colRight = part.colEnd + 1 <= maxCol ? part.colEnd + 1 : maxCol
+    const rowAbove = getRowAbove(part.row, minRow)
+    const rowBelow = getRowBelow(part.row, maxRow)
+    const colLeft = getColumnLeft(part.colStart, minCol)
+    const colRight = getColumnRight(part.colEnd, maxCol)
 
     const symbolCheck = processedResults.symbols.filter((symbol) => {
         const rowCheck = symbol.row >= rowAbove && symbol.row <= rowBelow
@@ -133,11 +142,46 @@ export const isAdjacentToSymbol = (input: {
     return symbolCheck.some((r) => r)
 }
 
+// find and return any adjacent parts to a given symbol
+export const partsAdjacentToSymbol = (input: {
+    symbol: Symbol
+    processedResults: SchematicDiscoveryResults
+    validParts: Part[]
+}) => {
+    const { symbol, processedResults, validParts } = input
+
+    // get our dimensions
+    const minCol = 0
+    const maxCol = processedResults.colCount
+    const minRow = 0
+    const maxRow = processedResults.rowCount
+
+    // get our adjacent pixels
+    const rowAbove = getRowAbove(symbol.row, minRow)
+    const rowBelow = getRowBelow(symbol.row, maxRow)
+    const colLeft = getColumnLeft(symbol.col, minCol)
+    const colRight = getColumnRight(symbol.col, maxCol)
+
+    const adjacentParts = validParts.filter((part) => {
+        const rowCheck = part.row >= rowAbove && part.row <= rowBelow
+        const colCheck =
+            (colLeft <= part.colStart && colRight >= part.colStart) ||
+            (colLeft <= part.colStart && colRight >= part.colEnd) ||
+            (colLeft >= part.colStart && colRight <= part.colEnd) ||
+            (colLeft >= part.colStart &&
+                colLeft <= part.colEnd &&
+                colRight >= part.colEnd)
+
+        return rowCheck && colCheck
+    })
+
+    return adjacentParts
+}
+
 export const extractPartNumbers = (
     processed: SchematicDiscoveryResults
 ): Part[] => {
-    const result: Part[] = []
-    const { parts, symbols } = processed
+    const { parts } = processed
 
     return parts.filter((part) =>
         isAdjacentToSymbol({
@@ -152,11 +196,38 @@ export const describeSchematic = (input: SchematicDiscoveryResults): void =>
         `Engine schematic is ${input.rowCount}x${input.colCount} with ${input.parts.length} parts and ${input.symbols.length} symbols`
     )
 
-export default () => {
+const part1 = () => {
     const features = extractFeatures(input)
     describeSchematic(features)
     const extracted = extractPartNumbers(features)
     const total = extracted.reduce((total, part) => (total += part.value), 0)
     console.log(`discovered ${extracted.length} parts!`)
     console.log(`3.1: ${total}`)
+}
+
+const part2 = () => {
+    const features = extractFeatures(input)
+    const extracted = extractPartNumbers(features)
+    const results = features.symbols
+        .filter((sym) => sym.value === '*')
+        .map((sym) =>
+            partsAdjacentToSymbol({
+                symbol: sym,
+                processedResults: features,
+                validParts: extracted,
+            })
+        )
+        .filter((parts) => parts.length === 2)
+        .reduce(
+            (total, adjacentParts) =>
+                (total += adjacentParts[0].value * adjacentParts[1].value),
+            0
+        )
+    console.log(`3.2: ${results}`)
+}
+
+export default () => {
+    console.log('Day 3:')
+    part1()
+    part2()
 }
