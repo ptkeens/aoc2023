@@ -13,7 +13,7 @@ type Symbol = {
     col: number
 }
 
-type ExtractedData = {
+type Schematic = {
     rowCount: number
     colCount: number
     parts: Part[]
@@ -22,14 +22,14 @@ type ExtractedData = {
 
 const input = extractInput('day3').map((line) => line.split(''))
 
-export const isValidSymbol = (symbol: string): boolean =>
-    /[!@#$%^&*()\+=\-_]/.test(symbol)
+export const isValidSymbol = (input: string): boolean =>
+    /[!@#$%^&*()\+=\-_]/.test(input)
 
 export const isNumeric = (character: string): boolean => /[\d+]/.test(character)
 
-export const findPartsNearSymbols = (output: ExtractedData) => {}
+export const findPartsNearSymbols = (output: Schematic) => {}
 
-export const extractDataFromInput = (input: string[][]): ExtractedData => {
+export const extractFeatures = (input: string[][]): Schematic => {
     // get dimensions of input
     const numRows = input.length
     const numCols = input[0].length
@@ -50,7 +50,7 @@ export const extractDataFromInput = (input: string[][]): ExtractedData => {
                     parts.push({
                         value: Number.parseInt(currentNumber),
                         row,
-                        colStart: col - 1 - numLen,
+                        colStart: col - numLen,
                         colEnd: col - 1,
                     })
                 }
@@ -77,7 +77,7 @@ export const extractDataFromInput = (input: string[][]): ExtractedData => {
                         value: Number.parseInt(currentNumber),
                         row,
                         colStart: col - numLen,
-                        colEnd: col,
+                        colEnd: col - 1,
                     })
 
                     // reset our tracker
@@ -96,6 +96,12 @@ export const extractDataFromInput = (input: string[][]): ExtractedData => {
     }
 }
 
+export const describeSchematic = (input: Schematic): void =>
+    console.log(
+        `Engine schematic is ${input.rowCount}x${input.colCount} with ${input.parts.length} parts and ${input.symbols.length} symbols`
+    )
+
 export default () => {
-    const extracted = extractDataFromInput(input)
+    const extracted = extractFeatures(input)
+    describeSchematic(extracted)
 }
