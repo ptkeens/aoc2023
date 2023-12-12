@@ -1,6 +1,7 @@
 import day1 from './one'
 import day2 from './two'
 import day3 from './three'
+import day4 from './four'
 
 // Day 1
 day1()
@@ -10,3 +11,6 @@ day2()
 
 // Day 3
 day3()
+
+// Day 4
+day4()
