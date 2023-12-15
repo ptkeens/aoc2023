@@ -230,4 +230,5 @@ export default () => {
     console.log('Day 3:')
     part1()
     part2()
+    console.log()
 }
