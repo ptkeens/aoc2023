@@ -115,5 +115,7 @@ export const parseInput = (input: string): Input => {
                     }
                 }
             }
+
+            return acc
         }, {} as Input)
 }
