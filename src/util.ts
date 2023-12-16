@@ -7,3 +7,15 @@ export const extractInput = (dayName: string) => {
         .split('\n')
         .filter((line) => line.trim().length > 0)
 }
+
+export const stringArrayToInt = (input: string[]): number[] =>
+    input
+        .map((section) => Number.parseInt(section.trim()))
+        .filter((num) => !Number.isNaN(num))
+
+export const splitLineBySpaces = (input: string): string[] =>
+    input
+        .trim()
+        .split(' ')
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0)
