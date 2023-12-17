@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "bun run src/index.ts",
-    "build": "bun build src/index.ts --outdir ./build"
+    "build": "bun build src/index.ts --outdir ./.build"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
