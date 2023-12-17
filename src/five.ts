@@ -7,9 +7,7 @@ type MapEntryRange = {
     end: number
 }
 
-type MapEntry = {
-    [K in RangeType]: MapEntryRange
-}
+type MapEntry = Record<RangeType, MapEntryRange>
 
 type MapType =
     | 'seed-to-soil'
@@ -20,13 +18,13 @@ type MapType =
     | 'temperature-to-humidity'
     | 'humidity-to-location'
 
-type DataMap<MapType> = {
+type DataMap = {
     type: MapType
     ranges: MapEntry[]
 }
 
 type Mappings = {
-    [K in MapType]: DataMap<MapType>
+    [K in MapType]: DataMap
 }
 
 type Input = {
@@ -34,51 +32,63 @@ type Input = {
     maps: Mappings
 }
 
-const demoInput = `
-seeds: 79 14 55 13
+const mapTypes = [
+    'seed-to-soil',
+    'soil-to-fertilizer',
+    'fertilizer-to-water',
+    'water-to-light',
+    'light-to-temperature',
+    'temperature-to-humidity',
+    'humidity-to-location',
+] as const
 
-seed-to-soil map:
-50 98 2
-52 50 48
+export const stringToMapType = (str: string): MapType => {
+    switch (str) {
+        case 'seed-to-soil map':
+            return 'seed-to-soil'
+        case 'soil-to-fertilizer map':
+            return 'soil-to-fertilizer'
+        case 'fertilizer-to-water map':
+            return 'fertilizer-to-water'
+        case 'water-to-light map':
+            return 'water-to-light'
+        case 'light-to-temperature map':
+            return 'light-to-temperature'
+        case 'temperature-to-humidity map':
+            return 'temperature-to-humidity'
+        case 'humidity-to-location map':
+            return 'humidity-to-location'
+        default:
+            throw new Error(`Invalid map type ${str}`)
+    }
+}
 
-soil-to-fertilizer map:
-0 15 37
-37 52 2
-39 0 15
+// type constructor helpers
+export const makeRange = (start: number, length: number): MapEntryRange => ({
+    start,
+    end: start + length - 1,
+})
 
-fertilizer-to-water map:
-49 53 8
-0 11 42
-42 0 7
-57 7 4
+export const makeInput = (): Input => ({
+    seeds: [],
+    maps: makeMappings(),
+})
 
-water-to-light map:
-88 18 7
-18 25 70
+export const makeMappings = () =>
+    mapTypes.reduce((coll, type) => {
+        coll[type] = makeDataMap(type)
+        return coll
+    }, {} as Mappings)
 
-light-to-temperature map:
-45 77 23
-81 45 19
-68 64 13
-
-temperature-to-humidity map:
-0 69 1
-1 0 69
-
-humidity-to-location map:
-60 56 37
-56 93 4
-`
+export const makeDataMap = (type: MapType): DataMap => ({
+    type,
+    ranges: [],
+})
 
 export const isRangeLine = (line: string) =>
     stringArrayToInt(splitLineBySpaces(line)).length === 3
 
 export const isInstructionLine = (line: string) => line.includes(':')
-
-export const makeRange = (start: number, length: number): MapEntryRange => ({
-    start,
-    end: start + length - 1,
-})
 
 export const parseRangeLine = (line: string): MapEntry => {
     const [destStart, sourceStart, rangeLength] = stringArrayToInt(
@@ -92,7 +102,8 @@ export const parseRangeLine = (line: string): MapEntry => {
 }
 
 export const parseInput = (input: string): Input => {
-    let instruction
+    let instruction: string
+    let mapType: MapType
     return input
         .trim()
         .split('\n')
@@ -102,20 +113,23 @@ export const parseInput = (input: string): Input => {
                 instruction = newInstruction.trim()
 
                 if (instruction === 'seeds') {
-                    acc['seeds'] = data
-                        .split(' ')
-                        .map((txt) => Number.parseInt(txt))
-                        .filter((num) => !Number.isNaN(num))
+                    acc['seeds'] = stringArrayToInt(splitLineBySpaces(data))
+                } else {
+                    mapType = stringToMapType(instruction)
                 }
             } else {
                 // ensure we are not on a space
                 if (line.trim().length > 0) {
                     if (isRangeLine(line)) {
                         const range = parseRangeLine(line)
+                        const current = acc.maps[mapType]
+                        current.ranges = [...current.ranges, range]
                     }
                 }
             }
 
             return acc
-        }, {} as Input)
+        }, makeInput())
 }
+
+export const part1 = () => {}
