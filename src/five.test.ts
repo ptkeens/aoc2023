@@ -5,6 +5,10 @@ import {
     makeRange,
     parseInput,
     parseRangeLine,
+    part1,
+    stringToMapType,
+    traverseMap,
+    traverseMaps,
 } from './five'
 
 describe('Day 5', () => {
@@ -77,46 +81,63 @@ describe('Day 5', () => {
         })
     })
 
-    describe('parseInput', () => {
-        it('should parse the demo input', () => {
-            const demoInput = `
-                seeds: 79 14 55 13
+    describe('traverseMap', () => {
+        const testMap = {
+            type: stringToMapType('seed-to-soil map'),
+            ranges: [parseRangeLine(`50 98 2`), parseRangeLine(`52 50 48`)],
+        }
 
-                seed-to-soil map:
-                50 98 2
-                52 50 48
+        it('should return the correct destination number', () => {
+            const output = traverseMap(testMap, 53)
+            expect(output).toBe(55)
+        })
+        it('should return the input number if not found in a map', () => {
+            const output = traverseMap(testMap, 150)
+            expect(output).toBe(150)
+        })
+    })
 
-                soil-to-fertilizer map:
-                0 15 37
-                37 52 2
-                39 0 15
+    describe('traverseMaps', () => {
+        it('should traverse a map set', () => {
+            const input = `seeds: 79 14 55 13
 
-                fertilizer-to-water map:
-                49 53 8
-                0 11 42
-                42 0 7
-                57 7 4
+            seed-to-soil map:
+            50 98 2
+            52 50 48
+            
+            soil-to-fertilizer map:
+            0 15 37
+            37 52 2
+            39 0 15
+            
+            fertilizer-to-water map:
+            49 53 8
+            0 11 42
+            42 0 7
+            57 7 4
+            
+            water-to-light map:
+            88 18 7
+            18 25 70
+            
+            light-to-temperature map:
+            45 77 23
+            81 45 19
+            68 64 13
+            
+            temperature-to-humidity map:
+            0 69 1
+            1 0 69
+            
+            humidity-to-location map:
+            60 56 37
+            56 93 4`
 
-                water-to-light map:
-                88 18 7
-                18 25 70
-
-                light-to-temperature map:
-                45 77 23
-                81 45 19
-                68 64 13
-
-                temperature-to-humidity map:
-                0 69 1
-                1 0 69
-
-                humidity-to-location map:
-                60 56 37
-                56 93 4
-            `
-
-            const parsed = parseInput(demoInput)
-            expect(parsed.seeds).toMatchObject([79, 14, 55, 13])
+            const parsed = parseInput(input)
+            const results = parsed.seeds.map((input) =>
+                traverseMaps(parsed.maps, input)
+            )
+            expect(results).toMatchObject([82, 43, 86, 35])
         })
     })
 })

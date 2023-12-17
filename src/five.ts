@@ -1,4 +1,4 @@
-import { splitLineBySpaces, stringArrayToInt } from './util'
+import { splitLineBySpaces, stringArrayToInt, extractInput } from './util'
 
 type RangeType = 'source' | 'destination'
 
@@ -101,6 +101,22 @@ export const parseRangeLine = (line: string): MapEntry => {
     }
 }
 
+export const traverseMaps = (mappings: Mappings, input: number) =>
+    mapTypes.reduce((output, mapType) => {
+        return traverseMap(mappings[mapType], output)
+    }, input)
+
+export const traverseMap = (map: DataMap, input: number) => {
+    for (const range of map.ranges) {
+        if (range.source.start <= input && range.source.end >= input) {
+            const diff = input - range.source.start
+            return range.destination.start + diff
+        }
+    }
+
+    return input
+}
+
 export const parseInput = (input: string): Input => {
     let instruction: string
     let mapType: MapType
@@ -118,7 +134,6 @@ export const parseInput = (input: string): Input => {
                     mapType = stringToMapType(instruction)
                 }
             } else {
-                // ensure we are not on a space
                 if (line.trim().length > 0) {
                     if (isRangeLine(line)) {
                         const range = parseRangeLine(line)
@@ -132,4 +147,26 @@ export const parseInput = (input: string): Input => {
         }, makeInput())
 }
 
-export const part1 = () => {}
+export const part1 = (input: string) => {
+    const parsed = parseInput(input)
+    const results = parsed.seeds.map((input) =>
+        traverseMaps(parsed.maps, input)
+    )
+    return Math.min(...results)
+}
+
+export const part2 = (input: string) => {
+    const parsed = parseInput(input)
+}
+
+export default () => {
+    const input = extractInput('day5').join('\n')
+
+    //5.1
+    const result1 = part1(input)
+    console.log(`5.1: ${result1}`)
+
+    //5.2
+    const result2 = part2(input)
+    console.log(`5.2: ${result2}`)
+}
